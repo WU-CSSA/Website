@@ -88,6 +88,29 @@ NEXTAUTH_URL="http://localhost:3000"
 openssl rand -base64 32
 ```
 
+#### GitHub OAuth Configuration
+
+Authentication uses GitHub OAuth. You need to create a GitHub OAuth App for local development:
+
+1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
+2. Click **"New OAuth App"**
+3. Fill in the details:
+   - **Application name**: `CSSA Dev` (or any name)
+   - **Homepage URL**: `http://localhost:3000`
+   - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
+4. Click **"Register application"**
+5. Copy the **Client ID**
+6. Click **"Generate a new client secret"** and copy it
+
+Add these to your `.env` file:
+
+```env
+GITHUB_CLIENT_ID="your-github-client-id"
+GITHUB_CLIENT_SECRET="your-github-client-secret"
+```
+
+> **Note**: For production, create a separate GitHub OAuth App with the production callback URL (e.g., `https://your-domain.com/api/auth/callback/github`). GitHub OAuth apps only support one callback URL per app, so you need separate apps for development and production.
+
 ### Database Setup
 
 Run the Prisma migration to create database tables:
@@ -194,12 +217,9 @@ Both events and posts support GitHub Flavored Markdown, including:
 
 ## Deployment
 
-### Vercel (Recommended)
+### K3s with ArgoCD (Recommended)
 
-1. Push your code to GitHub
-2. Import your repository on Vercel
-3. Add environment variables in the Vercel dashboard
-4. Deploy
+Refer to [The Helm Chart](./helm/README.md) for instructions on deploying with K3s and ArgoCD.
 
 ### Other Platforms
 
