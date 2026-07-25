@@ -16,6 +16,8 @@ RUN npm ci --ignore-scripts
 FROM deps AS prisma
 COPY prisma ./prisma/
 COPY prisma.config.ts ./
+# Dummy URL for generate (doesn't connect, just generates client)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 RUN npx prisma generate
 
 # ---- Builder ----
@@ -23,9 +25,8 @@ FROM base AS builder
 COPY --from=prisma /app/node_modules ./node_modules
 COPY . .
 
-# Build arguments for build-time env vars
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
+# Dummy URL for build (Next.js may reference Prisma during build)
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
 RUN npm run build
 
