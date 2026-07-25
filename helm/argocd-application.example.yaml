@@ -50,7 +50,9 @@ spec:
 
       # Override values for your environment
       parameters:
-        # TODO: Set your domain
+        # Ingress configuration for Traefik
+        - name: ingress.className
+          value: "traefik"
         - name: ingress.hosts[0].host
           value: cssa.example.com
         - name: ingress.tls[0].hosts[0]
