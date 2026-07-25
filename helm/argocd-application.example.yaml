@@ -1,0 +1,98 @@
+##############################################################################
+# Argo CD Application manifest for CSSA
+#
+# DEPLOYMENT STEPS:
+#
+# 1. First, create the namespace and secrets:
+#
+#    kubectl create namespace cssa
+#
+#    kubectl create secret generic cssa-secrets -n cssa \
+#      --from-literal=NEXTAUTH_SECRET="$(openssl rand -base64 32)" \
+#      --from-literal=GITHUB_CLIENT_ID='your-github-client-id' \
+#      --from-literal=GITHUB_CLIENT_SECRET='your-github-client-secret'
+#
+# 2. Update this file:
+#    - Set spec.source.repoURL to your Git repository
+#    - Set ingress host in spec.source.helm.parameters
+#    - Set postgresql password in spec.source.helm.parameters
+#
+# 3. Apply the Application:
+#
+#    kubectl apply -f argocd-application.yaml
+#
+# 4. Monitor deployment in Argo CD UI or CLI:
+#
+#    argocd app get cssa
+#    argocd app logs cssa
+#
+##############################################################################
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: cssa
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+
+  source:
+    # TODO: Update to your repository URL
+    repoURL: https://github.com/your-org/cssa.git
+    targetRevision: HEAD
+    path: helm/cssa
+
+    helm:
+      releaseName: cssa
+      valueFiles:
+        - values.yaml
+
+      # Override values for your environment
+      parameters:
+        # TODO: Set your domain
+        - name: ingress.hosts[0].host
+          value: cssa.example.com
+        - name: ingress.tls[0].hosts[0]
+          value: cssa.example.com
+        - name: env.NEXTAUTH_URL
+          value: https://cssa.example.com
+
+        # TODO: Set a secure password for PostgreSQL
+        - name: postgresql.auth.password
+          value: "CHANGE-ME-secure-password"
+        - name: postgresql.auth.postgresPassword
+          value: "CHANGE-ME-admin-password"
+
+        # Uncomment to set a specific image tag
+        # - name: image.tag
+        #   value: "v1.0.0"
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cssa
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: false
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+      - ServerSideApply=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
+
+  revisionHistoryLimit: 3

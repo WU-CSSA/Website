@@ -1,0 +1,43 @@
+Thank you for installing {{ .Chart.Name }}!
+
+Your release is named: {{ .Release.Name }}
+
+To get the application URL:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "cssa.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+  NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+        You can watch the status by running:
+        kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "cssa.fullname" . }}
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "cssa.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "cssa.fullname" . }} 8080:{{ .Values.service.port }}
+  Then visit: http://localhost:8080
+{{- end }}
+
+{{- if not .Values.secrets.create }}
+{{- if not .Values.externalSecrets.enabled }}
+
+WARNING: No secrets are configured!
+You must create a secret named "{{ include "cssa.secretName" . }}" with the following keys:
+  - DATABASE_URL
+  - NEXTAUTH_SECRET
+  - GITHUB_CLIENT_ID
+  - GITHUB_CLIENT_SECRET
+
+Example:
+  kubectl create secret generic {{ include "cssa.secretName" . }} \
+    --namespace {{ .Release.Namespace }} \
+    --from-literal=DATABASE_URL='postgresql://...' \
+    --from-literal=NEXTAUTH_SECRET='your-secret' \
+    --from-literal=GITHUB_CLIENT_ID='your-client-id' \
+    --from-literal=GITHUB_CLIENT_SECRET='your-client-secret'
+{{- end }}
+{{- end }}
