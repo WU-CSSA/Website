@@ -46,7 +46,7 @@ spec:
             - -c
             - |
               echo "Running database migrations..."
-              npx prisma migrate deploy
+              npx prisma@6 db push --accept-data-loss
               echo "Migrations complete!"
           envFrom:
             - configMapRef:
