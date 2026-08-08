@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma"
 import { theme } from "@/lib/theme"
 import { ContributionGraph } from "@/components/contribution-graph"
 import { FeaturedProjects } from "@/components/featured-projects"
+import { AttendanceLeaderboard } from "@/components/attendance-leaderboard"
 
 export default async function Home() {
   const recentPosts = await prisma.post.findMany({
@@ -26,6 +27,45 @@ export default async function Home() {
     orderBy: { createdAt: "desc" },
     take: 5,
   })
+
+  const topAttendees = await prisma.user.findMany({
+    where: {
+      eventRegistrations: {
+        some: {
+          checkedInAt: { not: null },
+        },
+      },
+    },
+    select: {
+      id: true,
+      displayName: true,
+      name: true,
+      image: true,
+      _count: {
+        select: {
+          eventRegistrations: {
+            where: { checkedInAt: { not: null } },
+          },
+        },
+      },
+    },
+    orderBy: {
+      eventRegistrations: {
+        _count: "desc",
+      },
+    },
+    take: 10,
+  })
+
+  const leaderboardUsers = topAttendees
+    .filter((user) => user._count.eventRegistrations > 0)
+    .map((user, index) => ({
+      rank: index + 1,
+      id: user.id,
+      displayName: user.displayName || user.name,
+      image: user.image,
+      checkInCount: user._count.eventRegistrations,
+    }))
 
   return (
     <div className="min-h-screen bg-theme-bg">
@@ -100,6 +140,32 @@ export default async function Home() {
           <ContributionGraph />
         </div>
       </section>
+
+      {/* Top Event Attendees */}
+      {leaderboardUsers.length > 0 && (
+        <section className={theme.section}>
+          <div className={theme.container}>
+            <div className="flex justify-between items-end mb-8">
+              <div>
+                <h2 className={`text-3xl ${theme.text.heading}`}>Top Event Attendees</h2>
+                <p className={`mt-2 ${theme.text.muted}`}>Recognizing our most active members</p>
+              </div>
+              <Link
+                href="/leaderboard"
+                className="text-accent hover:text-accent-hover font-medium flex items-center gap-1 transition-colors"
+              >
+                View full leaderboard
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+            <div className={`${theme.card.className} p-6`}>
+              <AttendanceLeaderboard users={leaderboardUsers} compact />
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Upcoming Events */}
       <section className={theme.section}>

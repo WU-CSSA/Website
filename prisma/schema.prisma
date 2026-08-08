@@ -54,11 +54,12 @@ model User {
   hasCompletedOnboarding Boolean   @default(false)
   createdAt              DateTime  @default(now())
 
-  accounts Account[]
-  sessions Session[]
-  posts    Post[]
-  events   Event[]
-  projects Project[]
+  accounts           Account[]
+  sessions           Session[]
+  posts              Post[]
+  events             Event[]
+  projects           Project[]
+  eventRegistrations EventRegistration[]
 }
 
 model VerificationToken {
@@ -91,12 +92,14 @@ model Event {
   startDate   DateTime
   endDate     DateTime?
   location    String?
+  checkInCode String?
   published   Boolean   @default(true)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   authorId    String
 
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author        User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  registrations EventRegistration[]
 }
 
 model Project {
@@ -115,4 +118,19 @@ model Project {
   authorId     String
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model EventRegistration {
+  id          String    @id @default(cuid())
+  eventId     String
+  userId      String
+  rsvpedAt    DateTime?
+  checkedInAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
 }

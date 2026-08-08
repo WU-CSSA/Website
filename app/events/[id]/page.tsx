@@ -4,6 +4,10 @@ import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { DeleteButton } from "@/components/delete-button"
 import { MarkdownContent } from "@/components/markdown-content"
+import { RsvpButton } from "@/components/rsvp-button"
+import { CheckinForm } from "@/components/checkin-form"
+import { AdminCheckinCode } from "@/components/admin-checkin-code"
+import { AttendeesList } from "@/components/attendees-list"
 import { theme } from "@/lib/theme"
 
 export default async function EventPage({
@@ -16,7 +20,23 @@ export default async function EventPage({
 
   const event = await prisma.event.findUnique({
     where: { id },
-    include: { author: true },
+    include: {
+      author: true,
+      registrations: {
+        where: { checkedInAt: { not: null } },
+        include: {
+          user: {
+            select: {
+              id: true,
+              displayName: true,
+              name: true,
+              image: true,
+            },
+          },
+        },
+        orderBy: { checkedInAt: "asc" },
+      },
+    },
   })
 
   if (!event || !event.published) {
@@ -24,6 +44,30 @@ export default async function EventPage({
   }
 
   const isAuthor = session?.user?.id === event.authorId
+  const isAdmin = session?.user?.isAdmin
+  const canManageEvent = isAuthor || isAdmin
+
+  const now = new Date()
+  const eventEnd = event.endDate || event.startDate
+  const isPastEvent = eventEnd < now
+
+  const rsvpCount = await prisma.eventRegistration.count({
+    where: { eventId: id, rsvpedAt: { not: null } },
+  })
+
+  let userRegistration = null
+  if (session?.user?.id) {
+    userRegistration = await prisma.eventRegistration.findUnique({
+      where: { eventId_userId: { eventId: id, userId: session.user.id } },
+    })
+  }
+
+  const attendees = event.registrations.map((r) => ({
+    id: r.user.id,
+    displayName: r.user.displayName || r.user.name,
+    image: r.user.image,
+    checkedInAt: r.checkedInAt!.toISOString(),
+  }))
 
   return (
     <div className="min-h-screen bg-theme-bg">
@@ -95,6 +139,43 @@ export default async function EventPage({
 
           {/* Markdown Content */}
           <MarkdownContent content={event.content} />
+
+          {/* Attendance Section */}
+          <div className="mt-8 pt-8 border-t border-theme-border space-y-6">
+            {!isPastEvent && (
+              <>
+                {/* RSVP Button */}
+                <RsvpButton
+                  eventId={event.id}
+                  initialRsvpCount={rsvpCount}
+                  initialHasRsvped={!!userRegistration?.rsvpedAt}
+                />
+
+                {/* Check-in Form (only if code exists) */}
+                {event.checkInCode && (
+                  <CheckinForm
+                    eventId={event.id}
+                    hasCheckedIn={!!userRegistration?.checkedInAt}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Past Event - Show Attendees */}
+            {isPastEvent && attendees.length > 0 && (
+              <AttendeesList attendees={attendees} />
+            )}
+
+            {/* Admin/Author Panel */}
+            {canManageEvent && !isPastEvent && (
+              <div className="pt-4 border-t border-theme-border">
+                <h3 className={`text-sm font-medium ${theme.text.muted} mb-4`}>
+                  Event Management
+                </h3>
+                <AdminCheckinCode eventId={event.id} />
+              </div>
+            )}
+          </div>
         </div>
       </article>
     </div>
