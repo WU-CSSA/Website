@@ -1,15 +1,15 @@
 apiVersion: v2
-name: cssa
-description: Computer Science Student Association web application
+name: tech-club
+description: Student Technology Association web application
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
 keywords:
   - nextjs
-  - cssa
+  - tech-club
   - student-association
 maintainers:
-  - name: CSSA Team
+  - name: Tech Club Team
 
 dependencies:
   - name: postgresql

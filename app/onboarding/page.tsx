@@ -28,15 +28,13 @@ export default async function OnboardingPage({
             href="/"
             className="inline-flex items-center gap-2 text-2xl font-bold text-theme-primary"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-white text-sm font-bold">
-              CS
-            </span>
-            CSSA
+            <img src="/logo.svg" alt="Tech Club" className="h-10 w-10" />
+            Tech Club
           </Link>
         </div>
         <div className={`${theme.card.className} p-8`}>
           <h2 className={`text-2xl text-center ${theme.text.heading} mb-2`}>
-            Welcome to CSSA!
+            Welcome to Tech Club!
           </h2>
           <p className="text-center text-theme-muted text-sm mb-8">
             Let&apos;s set up your profile. What would you like to be called?

@@ -1,4 +1,4 @@
-# Default values for cssa
+# Default values for tech-club
 # This is a YAML-formatted file.
 
 replicaCount: 1
@@ -45,14 +45,14 @@ ingress:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
   hosts:
-    - host: cssa.example.com
+    - host: techclub.example.com
       paths:
         - path: /
           pathType: Prefix
   tls:
-    - secretName: cssa-tls
+    - secretName: tech-club-tls
       hosts:
-        - cssa.example.com
+        - techclub.example.com
 
 resources:
   limits:
@@ -78,7 +78,7 @@ affinity: {}
 # Environment variables for the application
 env:
   NODE_ENV: production
-  NEXTAUTH_URL: https://cssa.example.com
+  NEXTAUTH_URL: https://techclub.example.com
 
 # Secrets - these should be provided via sealed-secrets or external-secrets
 secrets:
@@ -106,9 +106,9 @@ postgresql:
     tag: "17"  # Use major version tag for stability
   auth:
     postgresPassword: "changeme-postgres-admin"
-    username: cssa
-    password: "changeme-cssa-password"
-    database: cssa
+    username: techclub
+    password: "changeme-techclub-password"
+    database: techclub
   primary:
     persistence:
       enabled: true

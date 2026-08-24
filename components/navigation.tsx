@@ -1,7 +1,6 @@
 import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { SignOutButton } from "./sign-out-button"
-import { ThemeToggle } from "./theme-toggle"
 
 export async function Navigation() {
   const session = await auth()
@@ -16,10 +15,12 @@ export async function Navigation() {
               href="/"
               className="flex items-center gap-2 text-xl font-bold text-theme-primary"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white text-sm font-bold">
-                CS
-              </span>
-              <span className="hidden sm:inline">CSSA</span>
+              <img
+                src="/logo.svg"
+                alt="Tech Club"
+                className="h-8 w-8"
+              />
+              <span className="hidden sm:inline">Tech Club</span>
             </Link>
 
             <div className="hidden md:flex items-center gap-1">
@@ -52,8 +53,6 @@ export async function Navigation() {
 
           {/* Right Side */}
           <div className="flex items-center gap-2">
-            <ThemeToggle />
-
             {session?.user ? (
               <>
                 {session.user.isAdmin && (
@@ -78,7 +77,7 @@ export async function Navigation() {
                     </Link>
                     <Link
                       href="/admin/users"
-                      className="px-3 py-2 text-sm font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 hover:bg-theme-hover rounded-lg transition-colors"
+                      className="px-3 py-2 text-sm font-medium text-accent hover:text-accent-hover hover:bg-theme-hover rounded-lg transition-colors"
                     >
                       Admin
                     </Link>

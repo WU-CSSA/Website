@@ -2,9 +2,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "cssa.fullname" . }}-migrate-{{ .Release.Revision }}
+  name: {{ include "tech-club.fullname" . }}-migrate-{{ .Release.Revision }}
   labels:
-    {{- include "cssa.labels" . | nindent 4 }}
+    {{- include "tech-club.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-weight": "-5"
@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "cssa.selectorLabels" . | nindent 8 }}
+        {{- include "tech-club.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: migration
     spec:
       {{- with .Values.imagePullSecrets }}
@@ -31,7 +31,7 @@ spec:
             - sh
             - -c
             - |
-              until nc -z {{ include "cssa.fullname" . }}-postgresql 5432; do
+              until nc -z {{ include "tech-club.fullname" . }}-postgresql 5432; do
                 echo "Waiting for PostgreSQL..."
                 sleep 2
               done
@@ -50,16 +50,16 @@ spec:
               echo "Migrations complete!"
           envFrom:
             - configMapRef:
-                name: {{ include "cssa.fullname" . }}-config
+                name: {{ include "tech-club.fullname" . }}-config
             - secretRef:
-                name: {{ include "cssa.secretName" . }}
+                name: {{ include "tech-club.secretName" . }}
                 optional: true
           {{- if .Values.postgresql.enabled }}
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: {{ include "cssa.fullname" . }}-db-url
+                  name: {{ include "tech-club.fullname" . }}-db-url
                   key: DATABASE_URL
           {{- end }}
           resources:

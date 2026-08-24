@@ -2,57 +2,35 @@
 @plugin "@tailwindcss/typography";
 
 /* ============================================
-   CSSA Theme Configuration
+   Tech Club Theme Configuration
    Change these values to customize the entire site
    ============================================ */
 
 :root {
-  /* Accent Color - Change this to rebrand the site */
-  --accent: 99 102 241;           /* Indigo-500 */
-  --accent-hover: 79 70 229;       /* Indigo-600 */
-  --accent-light: 238 242 255;     /* Indigo-50 */
+  /* Terminal Green Theme */
+  --accent: 34 197 94;             /* Green-500 */
+  --accent-hover: 22 163 74;       /* Green-600 */
+  --accent-light: 20 30 20;        /* Dark green tint */
 
-  /* Light Mode Colors */
-  --theme-bg: 255 255 255;         /* White */
-  --theme-bg-secondary: 249 250 251; /* Gray-50 */
-  --theme-card: 255 255 255;       /* White */
-  --theme-border: 229 231 235;     /* Gray-200 */
-  --theme-input: 255 255 255;      /* White */
-  --theme-hover: 243 244 246;      /* Gray-100 */
+  /* Background Colors */
+  --theme-bg: 0 0 0;               /* Pure black */
+  --theme-bg-secondary: 10 10 10;  /* Near black */
+  --theme-card: 15 15 15;          /* Slightly lighter black */
+  --theme-border: 34 60 34;        /* Dark green border */
+  --theme-input: 10 10 10;         /* Near black */
+  --theme-hover: 25 40 25;         /* Dark green hover */
 
-  /* Light Mode Text */
-  --theme-primary: 17 24 39;       /* Gray-900 */
-  --theme-secondary: 75 85 99;     /* Gray-600 */
-  --theme-muted: 156 163 175;      /* Gray-400 */
+  /* Text Colors - Green phosphor */
+  --theme-primary: 74 222 128;     /* Green-400 - bright terminal green */
+  --theme-secondary: 34 197 94;    /* Green-500 */
+  --theme-muted: 22 101 52;        /* Green-800 - dim green */
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  /* Shadows - Green glow */
+  --shadow-sm: 0 0 5px rgb(34 197 94 / 0.2);
+  --shadow-md: 0 0 10px rgb(34 197 94 / 0.2), 0 0 20px rgb(34 197 94 / 0.1);
+  --shadow-lg: 0 0 20px rgb(34 197 94 / 0.3), 0 0 40px rgb(34 197 94 / 0.15);
 }
 
-.dark {
-  /* Dark Mode Colors */
-  --theme-bg: 17 24 39;            /* Gray-900 */
-  --theme-bg-secondary: 31 41 55;  /* Gray-800 */
-  --theme-card: 31 41 55;          /* Gray-800 */
-  --theme-border: 55 65 81;        /* Gray-700 */
-  --theme-input: 31 41 55;         /* Gray-800 */
-  --theme-hover: 55 65 81;         /* Gray-700 */
-
-  /* Dark Mode Text */
-  --theme-primary: 249 250 251;    /* Gray-50 */
-  --theme-secondary: 209 213 219;  /* Gray-300 */
-  --theme-muted: 107 114 128;      /* Gray-500 */
-
-  /* Darker accent for better contrast */
-  --accent-light: 49 46 129;       /* Indigo-900 */
-
-  /* Shadows */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
-}
 
 /* Tailwind Theme Extension */
 @theme inline {

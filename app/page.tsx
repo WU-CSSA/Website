@@ -79,14 +79,14 @@ export default async function Home() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
               </span>
-              Welcome to CSSA
+              Welcome to Tech Club
             </div>
             <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl ${theme.text.heading} leading-tight`}>
-              Computer Science
-              <span className="block text-accent">Student Association</span>
+              Student Technology
+              <span className="block text-accent">Association</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-theme-secondary max-w-2xl mx-auto leading-relaxed">
-              Join us in exploring the exciting world of computer science. Connect with fellow students,
+              Join us in exploring the exciting world of technology. Connect with fellow students,
               attend events, and build your skills together.
             </p>
             <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">

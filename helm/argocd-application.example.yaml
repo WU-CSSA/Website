@@ -1,13 +1,13 @@
 ##############################################################################
-# Argo CD Application manifest for CSSA
+# Argo CD Application manifest for Tech Club
 #
 # DEPLOYMENT STEPS:
 #
 # 1. First, create the namespace and secrets:
 #
-#    kubectl create namespace cssa
+#    kubectl create namespace tech-club
 #
-#    kubectl create secret generic cssa-secrets -n cssa \
+#    kubectl create secret generic tech-club-secrets -n tech-club \
 #      --from-literal=NEXTAUTH_SECRET="$(openssl rand -base64 32)" \
 #      --from-literal=GITHUB_CLIENT_ID='your-github-client-id' \
 #      --from-literal=GITHUB_CLIENT_SECRET='your-github-client-secret'
@@ -23,14 +23,14 @@
 #
 # 4. Monitor deployment in Argo CD UI or CLI:
 #
-#    argocd app get cssa
-#    argocd app logs cssa
+#    argocd app get tech-club
+#    argocd app logs tech-club
 #
 ##############################################################################
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: cssa
+  name: tech-club
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
@@ -39,12 +39,12 @@ spec:
 
   source:
     # TODO: Update to your repository URL
-    repoURL: https://github.com/your-org/cssa.git
+    repoURL: https://github.com/your-org/tech-club.git
     targetRevision: HEAD
-    path: helm/cssa
+    path: helm/tech-club
 
     helm:
-      releaseName: cssa
+      releaseName: tech-club
       valueFiles:
         - values.yaml
 
@@ -54,11 +54,11 @@ spec:
         - name: ingress.className
           value: "traefik"
         - name: ingress.hosts[0].host
-          value: cssa.example.com
+          value: tech-club.example.com
         - name: ingress.tls[0].hosts[0]
-          value: cssa.example.com
+          value: tech-club.example.com
         - name: env.NEXTAUTH_URL
-          value: https://cssa.example.com
+          value: https://tech-club.example.com
 
         # TODO: Set a secure password for PostgreSQL
         - name: postgresql.auth.password
@@ -72,7 +72,7 @@ spec:
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: cssa
+    namespace: tech-club
 
   syncPolicy:
     automated:

@@ -3,8 +3,8 @@ import { theme } from "@/lib/theme"
 import { AttendanceLeaderboard } from "@/components/attendance-leaderboard"
 
 export const metadata = {
-  title: "Attendance Leaderboard | CSSA",
-  description: "See who attends the most CSSA events",
+  title: "Attendance Leaderboard | Tech Club",
+  description: "See who attends the most Tech Club events",
 }
 
 export default async function LeaderboardPage() {

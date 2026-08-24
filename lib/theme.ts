@@ -48,8 +48,4 @@ export const theme = {
   container: "mx-auto max-w-7xl px-4 sm:px-6 lg:px-8",
   section: "py-12 md:py-16",
 
-  // Accent color (change this to rebrand the entire site)
-  accent: {
-    color: "indigo", // Options: indigo, blue, violet, emerald, rose, amber
-  }
 }
