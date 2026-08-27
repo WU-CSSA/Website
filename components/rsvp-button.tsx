@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import { theme } from "@/lib/theme"
+import { loginHref } from "@/lib/login-url"
 
 interface RsvpButtonProps {
   eventId: string
@@ -36,7 +37,7 @@ export function RsvpButton({
 
   const handleRsvp = async () => {
     if (status !== "authenticated") {
-      window.location.href = "/login"
+      window.location.href = loginHref(window.location.pathname)
       return
     }
 

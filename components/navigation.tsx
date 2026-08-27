@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { SignOutButton } from "./sign-out-button"
+import { SignInLink } from "./sign-in-link"
 
 export async function Navigation() {
   const session = await auth()
@@ -85,8 +86,7 @@ export async function Navigation() {
                 </div>
               </>
             ) : (
-              <Link
-                href="/login"
+              <SignInLink
                 className="px-4 py-2 text-sm font-semibold text-white bg-accent hover:bg-accent-hover rounded-lg transition-colors shadow-sm flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -97,7 +97,7 @@ export async function Navigation() {
                   />
                 </svg>
                 Sign In
-              </Link>
+              </SignInLink>
             )}
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useSession } from "next-auth/react"
 import { theme } from "@/lib/theme"
+import { SignInLink } from "./sign-in-link"
 
 interface CheckinFormProps {
   eventId: string
@@ -24,9 +25,9 @@ export function CheckinForm({ eventId, hasCheckedIn = false }: CheckinFormProps)
     return (
       <div className={`${theme.card.className} p-4`}>
         <p className="text-sm text-theme-muted">
-          <a href="/login" className="text-accent hover:text-accent-hover">
+          <SignInLink className="text-accent hover:text-accent-hover">
             Sign in
-          </a>{" "}
+          </SignInLink>{" "}
           to check in to this event
         </p>
       </div>

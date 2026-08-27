@@ -1,11 +1,21 @@
 "use client"
 
 import { signIn } from "next-auth/react"
+import { safeCallbackUrl } from "@/lib/login-url"
 
 export function LoginForm() {
+  const handleSignIn = () => {
+    // `middleware.ts` and the "Sign In" links set ?callbackUrl=<page the user
+    // was on>; fall back to the home page when it's missing.
+    const callbackUrl = safeCallbackUrl(
+      new URLSearchParams(window.location.search).get("callbackUrl")
+    )
+    signIn("github", { redirectTo: callbackUrl })
+  }
+
   return (
     <button
-      onClick={() => signIn("github", { callbackUrl: "/" })}
+      onClick={handleSignIn}
       className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-theme-border rounded-lg bg-theme-card hover:bg-theme-hover text-theme-primary font-medium transition-colors"
     >
       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

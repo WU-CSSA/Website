@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { EditProjectForm } from "./edit-project-form"
 import { theme } from "@/lib/theme"
+import { loginHref } from "@/lib/login-url"
 
 export default async function EditProjectPage({
   params,
@@ -13,7 +14,7 @@ export default async function EditProjectPage({
   const { id } = await params
 
   if (!session?.user) {
-    redirect("/login")
+    redirect(loginHref(`/projects/${id}/edit`))
   }
 
   const project = await prisma.project.findUnique({

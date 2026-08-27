@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { EditPostForm } from "./edit-post-form"
 import { theme } from "@/lib/theme"
+import { loginHref } from "@/lib/login-url"
 
 export default async function EditPostPage({
   params,
@@ -10,11 +11,11 @@ export default async function EditPostPage({
   params: Promise<{ id: string }>
 }) {
   const session = await auth()
-  if (!session?.user) {
-    redirect("/login")
-  }
-
   const { id } = await params
+
+  if (!session?.user) {
+    redirect(loginHref(`/posts/${id}/edit`))
+  }
 
   const post = await prisma.post.findUnique({
     where: { id },

@@ -2,12 +2,13 @@ import { redirect } from "next/navigation"
 import { auth } from "@/lib/auth"
 import { CreateProjectForm } from "./create-project-form"
 import { theme } from "@/lib/theme"
+import { loginHref } from "@/lib/login-url"
 
 export default async function NewProjectPage() {
   const session = await auth()
 
   if (!session?.user) {
-    redirect("/login")
+    redirect(loginHref("/projects/new"))
   }
 
   if (!session.user.isAdmin) {

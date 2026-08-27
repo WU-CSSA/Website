@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
 import { EditEventForm } from "./edit-event-form"
 import { theme } from "@/lib/theme"
+import { loginHref } from "@/lib/login-url"
 
 export default async function EditEventPage({
   params,
@@ -10,11 +11,11 @@ export default async function EditEventPage({
   params: Promise<{ id: string }>
 }) {
   const session = await auth()
-  if (!session?.user) {
-    redirect("/login")
-  }
-
   const { id } = await params
+
+  if (!session?.user) {
+    redirect(loginHref(`/events/${id}/edit`))
+  }
 
   const event = await prisma.event.findUnique({
     where: { id },
