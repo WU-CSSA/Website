@@ -106,9 +106,13 @@ postgresql:
     tag: "17"  # Use major version tag for stability
   auth:
     postgresPassword: "changeme-postgres-admin"
-    username: techclub
+    # NOTE: must stay "cssa" — the live PostgreSQL PVC was initialized with
+    # this role/database name. Bitnami only creates the user/db on first init,
+    # so renaming here does NOT rename them in an existing database and will
+    # break auth for every new pod. Change only alongside a real DB migration.
+    username: cssa
     password: "changeme-techclub-password"
-    database: techclub
+    database: cssa
   primary:
     persistence:
       enabled: true
