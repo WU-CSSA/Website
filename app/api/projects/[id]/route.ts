@@ -121,7 +121,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Project not found" }, { status: 404 })
     }
 
-    if (existingProject.authorId !== session.user.id) {
+    if (existingProject.authorId !== session.user.id && !session.user.isAdmin) {
       return NextResponse.json(
         { error: "You can only delete your own projects" },
         { status: 403 }

@@ -79,14 +79,16 @@ export default async function EventPage({
               <h1 className={`text-3xl md:text-4xl ${theme.text.heading} flex-1`}>
                 {event.title}
               </h1>
-              {isAuthor && (
+              {canManageEvent && (
                 <div className="flex gap-2 ml-4">
-                  <Link
-                    href={`/events/${event.id}/edit`}
-                    className={theme.button.secondary}
-                  >
-                    Edit
-                  </Link>
+                  {isAuthor && (
+                    <Link
+                      href={`/events/${event.id}/edit`}
+                      className={theme.button.secondary}
+                    >
+                      Edit
+                    </Link>
+                  )}
                   <DeleteButton id={event.id} type="event" redirectTo="/calendar" />
                 </div>
               )}
