@@ -1,8 +1,11 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import { theme } from "@/lib/theme"
 
 export default async function CalendarPage() {
+  const session = await auth()
+
   const events = await prisma.event.findMany({
     where: { published: true },
     orderBy: { startDate: "asc" },
@@ -19,9 +22,16 @@ export default async function CalendarPage() {
   return (
     <div className="min-h-screen bg-theme-bg">
       <div className={`${theme.container} ${theme.section}`}>
-        <div className="mb-10">
-          <h1 className={`text-4xl ${theme.text.heading}`}>Events Calendar</h1>
-          <p className={`mt-2 ${theme.text.muted}`}>Discover upcoming events and activities</p>
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h1 className={`text-4xl ${theme.text.heading}`}>Events Calendar</h1>
+            <p className={`mt-2 ${theme.text.muted}`}>Discover upcoming events and activities</p>
+          </div>
+          {session?.user?.isAdmin && (
+            <Link href="/events/new" className={theme.button.primary}>
+              New Event
+            </Link>
+          )}
         </div>
 
         {/* Upcoming Events */}

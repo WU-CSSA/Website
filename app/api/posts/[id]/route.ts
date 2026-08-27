@@ -13,7 +13,7 @@ export async function PATCH(
     }
 
     const { id } = await params
-    const { title, description, content } = await request.json()
+    const { title, description, content, type } = await request.json()
 
     // Check if post exists and user is the author
     const existingPost = await prisma.post.findUnique({
@@ -37,6 +37,7 @@ export async function PATCH(
         title,
         description: description || null,
         content,
+        ...(type && { type }),
       },
     })
 

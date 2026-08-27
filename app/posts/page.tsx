@@ -1,8 +1,11 @@
 import Link from "next/link"
 import { prisma } from "@/lib/prisma"
+import { auth } from "@/lib/auth"
 import { theme } from "@/lib/theme"
 
 export default async function PostsPage() {
+  const session = await auth()
+
   const posts = await prisma.post.findMany({
     where: { published: true },
     orderBy: { createdAt: "desc" },
@@ -13,9 +16,16 @@ export default async function PostsPage() {
     <div className="min-h-screen bg-theme-bg">
       <div className={`${theme.container} ${theme.section}`}>
         <div className="max-w-4xl mx-auto">
-          <div className="mb-10">
-            <h1 className={`text-4xl ${theme.text.heading}`}>Posts</h1>
-            <p className={`mt-2 ${theme.text.muted}`}>News and updates from the community</p>
+          <div className="flex justify-between items-end mb-10">
+            <div>
+              <h1 className={`text-4xl ${theme.text.heading}`}>Posts</h1>
+              <p className={`mt-2 ${theme.text.muted}`}>News and updates from the community</p>
+            </div>
+            {session?.user?.isAdmin && (
+              <Link href="/posts/new" className={theme.button.primary}>
+                New Post
+              </Link>
+            )}
           </div>
 
           {posts.length > 0 ? (

@@ -106,7 +106,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       }
       return true
     },
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, account, profile, trigger, session }) {
       // Only fetch from DB on sign-in or explicit update (not on every request)
       // This avoids Prisma calls in Edge runtime (middleware)
       if (user) {
@@ -122,7 +122,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
         })
         if (dbUser) {
-          token.githubUsername = dbUser.githubUsername
+          // Set githubUsername if not already set (fixes first sign-in)
+          if (!dbUser.githubUsername && account?.provider === "github" && profile?.login) {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { githubUsername: profile.login as string },
+            })
+            token.githubUsername = profile.login as string
+          } else {
+            token.githubUsername = dbUser.githubUsername
+          }
           token.displayName = dbUser.displayName
           token.isAdmin = dbUser.isAdmin
           token.isApproved = dbUser.isApproved

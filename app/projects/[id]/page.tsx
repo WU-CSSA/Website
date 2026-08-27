@@ -3,7 +3,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { DeleteButton } from "@/components/delete-button"
-import { MarkdownContent } from "@/components/markdown-content"
+import { ContentRenderer } from "@/components/content-renderer"
 import { TechnologyBadge } from "@/components/technology-badge"
 import { theme } from "@/lib/theme"
 
@@ -151,8 +151,14 @@ export default async function ProjectPage({
               </div>
             </header>
 
-            {/* Markdown Content */}
-            <MarkdownContent content={project.content} />
+            {/* Content */}
+            <ContentRenderer
+              content={project.content}
+              type={project.type}
+              title={project.title}
+              resourceType="project"
+              resourceId={project.id}
+            />
           </div>
         </div>
       </article>

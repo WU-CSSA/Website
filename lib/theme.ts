@@ -9,6 +9,9 @@ export const theme = {
   textarea: {
     className: "block w-full rounded-lg border border-theme-border bg-theme-input px-4 py-2.5 text-theme-primary placeholder-theme-muted shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
   },
+  select: {
+    className: "mt-1 block w-full rounded-lg border border-theme-border bg-theme-input px-4 py-2.5 text-theme-primary shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
+  },
   checkbox: {
     className: "h-4 w-4 rounded border-theme-border bg-theme-input text-accent focus:ring-accent focus:ring-offset-theme-bg"
   },

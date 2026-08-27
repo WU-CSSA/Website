@@ -70,15 +70,23 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+// Content type for posts and projects
+enum ContentType {
+  MARKDOWN    // Standard markdown content
+  REVEAL_MD   // Markdown with slide separators for RevealJS
+  REVEAL_HTML // Raw RevealJS HTML
+}
+
 // Application models
 model Post {
-  id          String   @id @default(cuid())
+  id          String      @id @default(cuid())
   title       String
   description String?
-  content     String   @db.Text
-  published   Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  content     String      @db.Text
+  type        ContentType @default(MARKDOWN)
+  published   Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   authorId    String
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
@@ -103,18 +111,19 @@ model Event {
 }
 
 model Project {
-  id           String   @id @default(cuid())
+  id           String      @id @default(cuid())
   title        String
-  description  String   @db.Text
-  content      String   @db.Text
+  description  String      @db.Text
+  content      String      @db.Text
+  type         ContentType @default(MARKDOWN)
   imageUrl     String?
   githubUrl    String?
   demoUrl      String?
-  technologies String[] @default([])
-  featured     Boolean  @default(false)
-  published    Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  technologies String[]    @default([])
+  featured     Boolean     @default(false)
+  published    Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
   authorId     String
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)

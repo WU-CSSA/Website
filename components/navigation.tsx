@@ -56,32 +56,12 @@ export async function Navigation() {
             {session?.user ? (
               <>
                 {session.user.isAdmin && (
-                  <div className="hidden sm:flex items-center gap-1">
-                    <Link
-                      href="/events/new"
-                      className="px-3 py-2 text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-hover rounded-lg transition-colors"
-                    >
-                      New Event
-                    </Link>
-                    <Link
-                      href="/posts/new"
-                      className="px-3 py-2 text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-hover rounded-lg transition-colors"
-                    >
-                      New Post
-                    </Link>
-                    <Link
-                      href="/projects/new"
-                      className="px-3 py-2 text-sm font-medium text-theme-secondary hover:text-theme-primary hover:bg-theme-hover rounded-lg transition-colors"
-                    >
-                      New Project
-                    </Link>
-                    <Link
-                      href="/admin/users"
-                      className="px-3 py-2 text-sm font-medium text-accent hover:text-accent-hover hover:bg-theme-hover rounded-lg transition-colors"
-                    >
-                      Admin
-                    </Link>
-                  </div>
+                  <Link
+                    href="/admin/users"
+                    className="hidden sm:block px-3 py-2 text-sm font-medium text-accent hover:text-accent-hover hover:bg-theme-hover rounded-lg transition-colors"
+                  >
+                    Admin
+                  </Link>
                 )}
                 <div className="h-6 w-px bg-theme-border mx-2 hidden sm:block" />
                 <div className="flex items-center gap-3">

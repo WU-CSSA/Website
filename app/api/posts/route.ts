@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const { title, description, content, authorId } = await request.json()
+    const { title, description, content, type, authorId } = await request.json()
 
     if (!title || !content) {
       return NextResponse.json(
@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         title,
         description: description || null,
         content,
+        type: type || "MARKDOWN",
         published: true,
         authorId,
       },

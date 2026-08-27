@@ -3,7 +3,7 @@ import Link from "next/link"
 import { prisma } from "@/lib/prisma"
 import { auth } from "@/lib/auth"
 import { DeleteButton } from "@/components/delete-button"
-import { MarkdownContent } from "@/components/markdown-content"
+import { ContentRenderer } from "@/components/content-renderer"
 import { theme } from "@/lib/theme"
 
 export default async function PostPage({
@@ -75,8 +75,14 @@ export default async function PostPage({
             </div>
           </header>
 
-          {/* Markdown Content */}
-          <MarkdownContent content={post.content} />
+          {/* Content */}
+          <ContentRenderer
+            content={post.content}
+            type={post.type}
+            title={post.title}
+            resourceType="post"
+            resourceId={post.id}
+          />
         </div>
       </article>
     </div>

@@ -1,8 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Input, Textarea, Button, Checkbox } from "@/components/ui"
+import { Input, Textarea, Button, Checkbox, Select } from "@/components/ui"
+import type { ContentType } from "@prisma/client"
 
 export function CreateProjectForm({ userId }: { userId: string }) {
   const router = useRouter()
@@ -10,6 +11,9 @@ export function CreateProjectForm({ userId }: { userId: string }) {
   const [isLoading, setIsLoading] = useState(false)
   const [technologies, setTechnologies] = useState<string[]>([])
   const [techInput, setTechInput] = useState("")
+  const [contentType, setContentType] = useState<ContentType>("MARKDOWN")
+  const [content, setContent] = useState("")
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function addTechnology() {
     const tech = techInput.trim()
@@ -30,6 +34,26 @@ export function CreateProjectForm({ userId }: { userId: string }) {
     }
   }
 
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const extension = file.name.split(".").pop()?.toLowerCase()
+
+    if (contentType === "REVEAL_MD" && extension !== "md") {
+      setError("Please upload a .md file for Markdown presentations")
+      return
+    }
+    if (contentType === "REVEAL_HTML" && extension !== "html" && extension !== "htm") {
+      setError("Please upload an .html file for HTML presentations")
+      return
+    }
+
+    const text = await file.text()
+    setContent(text)
+    setError(null)
+  }
+
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
@@ -38,7 +62,6 @@ export function CreateProjectForm({ userId }: { userId: string }) {
     const formData = new FormData(e.currentTarget)
     const title = formData.get("title") as string
     const description = formData.get("description") as string
-    const content = formData.get("content") as string
     const imageUrl = formData.get("imageUrl") as string
     const githubUrl = formData.get("githubUrl") as string
     const demoUrl = formData.get("demoUrl") as string
@@ -54,6 +77,7 @@ export function CreateProjectForm({ userId }: { userId: string }) {
           title,
           description,
           content,
+          type: contentType,
           imageUrl,
           githubUrl,
           demoUrl,
@@ -72,10 +96,32 @@ export function CreateProjectForm({ userId }: { userId: string }) {
       const data = await response.json()
       router.push(`/projects/${data.project.id}`)
       router.refresh()
-    } catch (error) {
+    } catch {
       setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const getContentDescription = () => {
+    switch (contentType) {
+      case "MARKDOWN":
+        return "Detailed description of the project. You can use Markdown formatting."
+      case "REVEAL_MD":
+        return "Use --- to separate horizontal slides, -- for vertical slides. Markdown is supported."
+      case "REVEAL_HTML":
+        return "Paste or upload raw RevealJS HTML. Each <section> is a slide."
+    }
+  }
+
+  const getFileAccept = () => {
+    switch (contentType) {
+      case "REVEAL_MD":
+        return ".md"
+      case "REVEAL_HTML":
+        return ".html,.htm"
+      default:
+        return undefined
     }
   }
 
@@ -168,13 +214,52 @@ export function CreateProjectForm({ userId }: { userId: string }) {
         </p>
       </div>
 
+      <Select
+        id="type"
+        name="type"
+        label="Content Type"
+        value={contentType}
+        onChange={(e) => {
+          setContentType(e.target.value as ContentType)
+          setContent("")
+          if (fileInputRef.current) {
+            fileInputRef.current.value = ""
+          }
+        }}
+        description="Choose the format for your content"
+      >
+        <option value="MARKDOWN">Markdown</option>
+        <option value="REVEAL_MD">RevealJS Presentation (Markdown)</option>
+        <option value="REVEAL_HTML">RevealJS Presentation (HTML)</option>
+      </Select>
+
+      {(contentType === "REVEAL_MD" || contentType === "REVEAL_HTML") && (
+        <div>
+          <label className="block text-sm font-medium text-theme-primary mb-1.5">
+            Upload File (Optional)
+          </label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={getFileAccept()}
+            onChange={handleFileUpload}
+            className="block w-full text-sm text-theme-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-white hover:file:bg-accent-hover"
+          />
+          <p className="mt-1.5 text-sm text-theme-muted">
+            Or paste content directly in the textarea below
+          </p>
+        </div>
+      )}
+
       <Textarea
         id="content"
         name="content"
         rows={15}
         label="Content"
-        description="Detailed description of the project. You can use Markdown formatting."
+        description={getContentDescription()}
         required
+        value={content}
+        onChange={(e) => setContent(e.target.value)}
       />
 
       <Checkbox id="featured" name="featured" label="Featured project" />
