@@ -4,15 +4,20 @@ import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { Input, Textarea, Button, Checkbox, Select } from "@/components/ui"
 import type { ContentType } from "@prisma/client"
+import { readFileAsBase64, formatFileSize } from "@/lib/file-client"
+import { MAX_PPTX_FILE_BYTES } from "@/lib/pptx"
 
 export function CreateProjectForm({ userId }: { userId: string }) {
   const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [isProcessingFile, setIsProcessingFile] = useState(false)
   const [technologies, setTechnologies] = useState<string[]>([])
   const [techInput, setTechInput] = useState("")
   const [contentType, setContentType] = useState<ContentType>("MARKDOWN")
   const [content, setContent] = useState("")
+  const [pptxFileName, setPptxFileName] = useState<string | null>(null)
+  const [pptxFileSize, setPptxFileSize] = useState<number | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   function addTechnology() {
@@ -34,6 +39,15 @@ export function CreateProjectForm({ userId }: { userId: string }) {
     }
   }
 
+  function resetPptxFile() {
+    setContent("")
+    setPptxFileName(null)
+    setPptxFileSize(null)
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -48,6 +62,30 @@ export function CreateProjectForm({ userId }: { userId: string }) {
       setError("Please upload an .html file for HTML presentations")
       return
     }
+    if (contentType === "PPTX") {
+      if (extension !== "pptx") {
+        setError("Please upload a .pptx file")
+        return
+      }
+      if (file.size > MAX_PPTX_FILE_BYTES) {
+        setError(`PPTX file exceeds the ${MAX_PPTX_FILE_BYTES / (1024 * 1024)}MB limit`)
+        return
+      }
+
+      setIsProcessingFile(true)
+      setError(null)
+      try {
+        const base64 = await readFileAsBase64(file)
+        setContent(base64)
+        setPptxFileName(file.name)
+        setPptxFileSize(file.size)
+      } catch {
+        setError("Failed to read PPTX file")
+      } finally {
+        setIsProcessingFile(false)
+      }
+      return
+    }
 
     const text = await file.text()
     setContent(text)
@@ -57,6 +95,12 @@ export function CreateProjectForm({ userId }: { userId: string }) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
+
+    if (contentType === "PPTX" && !content) {
+      setError("Please upload a .pptx file")
+      return
+    }
+
     setIsLoading(true)
 
     const formData = new FormData(e.currentTarget)
@@ -111,6 +155,8 @@ export function CreateProjectForm({ userId }: { userId: string }) {
         return "Use --- to separate horizontal slides, -- for vertical slides. Markdown is supported."
       case "REVEAL_HTML":
         return "Paste or upload raw RevealJS HTML. Each <section> is a slide."
+      case "PPTX":
+        return "Upload a PowerPoint file. It's rendered directly in the browser - no conversion."
     }
   }
 
@@ -120,6 +166,8 @@ export function CreateProjectForm({ userId }: { userId: string }) {
         return ".md"
       case "REVEAL_HTML":
         return ".html,.htm"
+      case "PPTX":
+        return ".pptx"
       default:
         return undefined
     }
@@ -221,16 +269,14 @@ export function CreateProjectForm({ userId }: { userId: string }) {
         value={contentType}
         onChange={(e) => {
           setContentType(e.target.value as ContentType)
-          setContent("")
-          if (fileInputRef.current) {
-            fileInputRef.current.value = ""
-          }
+          resetPptxFile()
         }}
         description="Choose the format for your content"
       >
         <option value="MARKDOWN">Markdown</option>
         <option value="REVEAL_MD">RevealJS Presentation (Markdown)</option>
         <option value="REVEAL_HTML">RevealJS Presentation (HTML)</option>
+        <option value="PPTX">PowerPoint Presentation (PPTX)</option>
       </Select>
 
       {(contentType === "REVEAL_MD" || contentType === "REVEAL_HTML") && (
@@ -251,16 +297,55 @@ export function CreateProjectForm({ userId }: { userId: string }) {
         </div>
       )}
 
-      <Textarea
-        id="content"
-        name="content"
-        rows={15}
-        label="Content"
-        description={getContentDescription()}
-        required
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-      />
+      {contentType === "PPTX" && (
+        <div>
+          <label className="block text-sm font-medium text-theme-primary mb-1.5">
+            Upload File
+          </label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept={getFileAccept()}
+            onChange={handleFileUpload}
+            disabled={isProcessingFile}
+            className="block w-full text-sm text-theme-secondary file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-white hover:file:bg-accent-hover disabled:opacity-50"
+          />
+          {isProcessingFile && (
+            <p className="mt-1.5 text-sm text-accent">Reading file&hellip;</p>
+          )}
+          {!isProcessingFile && pptxFileName && (
+            <div className="mt-2 flex items-center justify-between rounded-md bg-theme-secondary/50 px-3 py-2 text-sm">
+              <span className="text-theme-primary">
+                📎 {pptxFileName}
+                {pptxFileSize !== null && (
+                  <span className="text-theme-muted"> ({formatFileSize(pptxFileSize)})</span>
+                )}
+              </span>
+              <button
+                type="button"
+                onClick={resetPptxFile}
+                className="text-theme-muted hover:text-theme-primary"
+              >
+                Remove
+              </button>
+            </div>
+          )}
+          <p className="mt-1.5 text-sm text-theme-muted">{getContentDescription()}</p>
+        </div>
+      )}
+
+      {contentType !== "PPTX" && (
+        <Textarea
+          id="content"
+          name="content"
+          rows={15}
+          label="Content"
+          description={getContentDescription()}
+          required
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+        />
+      )}
 
       <Checkbox id="featured" name="featured" label="Featured project" />
 

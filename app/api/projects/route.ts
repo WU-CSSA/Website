@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { validateContentForType } from "@/lib/content-validation"
 
 export async function GET() {
   try {
@@ -54,6 +55,11 @@ export async function POST(request: NextRequest) {
         { error: "Title, description, and content are required" },
         { status: 400 }
       )
+    }
+
+    const contentError = validateContentForType(type, content)
+    if (contentError) {
+      return NextResponse.json({ error: contentError }, { status: 400 })
     }
 
     if (authorId !== session.user.id) {

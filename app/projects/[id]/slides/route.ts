@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma"
 import { buildRevealHtml } from "@/lib/reveal"
+import { buildPptxViewerHtml } from "@/lib/pptx"
 
 export async function GET(
   request: Request,
@@ -19,7 +20,10 @@ export async function GET(
     return new Response("This project is not a presentation", { status: 400 })
   }
 
-  const html = buildRevealHtml(project.content, project.type, project.title)
+  const html =
+    project.type === "PPTX"
+      ? buildPptxViewerHtml(project.content, project.title)
+      : buildRevealHtml(project.content, project.type, project.title)
 
   return new Response(html, {
     headers: {

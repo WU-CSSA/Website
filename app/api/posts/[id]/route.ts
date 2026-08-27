@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { validateContentForType } from "@/lib/content-validation"
 
 export async function PATCH(
   request: NextRequest,
@@ -29,6 +30,13 @@ export async function PATCH(
         { error: "You can only edit your own posts" },
         { status: 403 }
       )
+    }
+
+    if (content) {
+      const contentError = validateContentForType(type || existingPost.type, content)
+      if (contentError) {
+        return NextResponse.json({ error: contentError }, { status: 400 })
+      }
     }
 
     const post = await prisma.post.update({

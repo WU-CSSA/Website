@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/lib/auth"
 import { prisma } from "@/lib/prisma"
+import { validateContentForType } from "@/lib/content-validation"
 
 export async function GET(
   request: NextRequest,
@@ -65,6 +66,13 @@ export async function PATCH(
         { error: "You can only edit your own projects" },
         { status: 403 }
       )
+    }
+
+    if (content) {
+      const contentError = validateContentForType(type || existingProject.type, content)
+      if (contentError) {
+        return NextResponse.json({ error: contentError }, { status: 400 })
+      }
     }
 
     const project = await prisma.project.update({

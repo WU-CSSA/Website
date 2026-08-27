@@ -75,6 +75,7 @@ enum ContentType {
   MARKDOWN    // Standard markdown content
   REVEAL_MD   // Markdown with slide separators for RevealJS
   REVEAL_HTML // Raw RevealJS HTML
+  PPTX        // PowerPoint file, stored as base64 and rendered client-side
 }
 
 // Application models

@@ -22,6 +22,10 @@ export function ContentRenderer({
   }
 
   const slidesUrl = `/${resourceType}s/${resourceId}/slides`
+  const description =
+    type === "PPTX"
+      ? "This content is a PowerPoint presentation."
+      : "This content is a RevealJS presentation."
 
   return (
     <div className="space-y-4">
@@ -29,9 +33,7 @@ export function ContentRenderer({
         <h3 className="text-lg font-medium text-theme-primary mb-2">
           {title || "Presentation"}
         </h3>
-        <p className="text-theme-secondary mb-4">
-          This content is a RevealJS presentation.
-        </p>
+        <p className="text-theme-secondary mb-4">{description}</p>
         <Link
           href={slidesUrl}
           target="_blank"
@@ -59,7 +61,9 @@ export function ContentRenderer({
           Open Presentation
         </Link>
         <p className="text-sm text-theme-muted mt-4">
-          Opens in a new tab. Use arrow keys to navigate, S for speaker notes, F for fullscreen.
+          {type === "PPTX"
+            ? "Opens in a new tab. Use arrow keys or click to navigate, F for fullscreen."
+            : "Opens in a new tab. Use arrow keys to navigate, S for speaker notes, F for fullscreen."}
         </p>
       </div>
     </div>
