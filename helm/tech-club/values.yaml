@@ -4,7 +4,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/wu-cssa/website
+  repository: ghcr.io/willamette-tech/website
   pullPolicy: Always
   tag: "latest"  # Use "latest" or a specific SHA/tag
 
