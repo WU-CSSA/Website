@@ -34,6 +34,10 @@ RUN npm run build
 FROM base AS runner
 ENV NODE_ENV=production
 
+# Timezone database so named zones (e.g. TZ=America/Los_Angeles) resolve;
+# alpine has no tzdata by default and would otherwise fall back to UTC.
+RUN apk add --no-cache tzdata
+
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs

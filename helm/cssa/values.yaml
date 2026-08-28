@@ -79,6 +79,9 @@ affinity: {}
 env:
   NODE_ENV: production
   NEXTAUTH_URL: https://techclub.example.com
+  # Server-side timezone used for date/time rendering (SSR). Pacific w/ DST.
+  # Requires tzdata in the runtime image (see Dockerfile).
+  TZ: America/Los_Angeles
 
 # Secrets - these should be provided via sealed-secrets or external-secrets
 secrets:
