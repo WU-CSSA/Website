@@ -31,8 +31,9 @@ spec:
       serviceAccountName: {{ include "tech-club.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.postgresql.enabled }}
+      {{- if or .Values.postgresql.enabled .Values.migrations.enabled }}
       initContainers:
+        {{- if .Values.postgresql.enabled }}
         - name: wait-for-postgres
           image: busybox:1.36
           command:
@@ -44,6 +45,52 @@ spec:
                 sleep 2
               done
               echo "PostgreSQL is ready!"
+        {{- end }}
+        {{- if .Values.migrations.enabled }}
+        # Sync the DB schema to the deployed image on every pod start. This is
+        # what makes "git push -> image builds -> kubectl rollout restart" apply
+        # schema changes without a separate step. Runs before the app container,
+        # so a failed migration blocks the rollout instead of serving a broken app.
+        - name: db-migrate
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          command:
+            - sh
+            - -c
+            - |
+              cd /app
+              echo "Syncing database schema..."
+              if command -v prisma >/dev/null 2>&1; then
+                set -- prisma db push --accept-data-loss --skip-generate
+              else
+                set -- npx --yes prisma@6 db push --accept-data-loss --skip-generate
+              fi
+              out=$("$@" 2>&1); rc=$?
+              echo "$out"
+              # Treat a successful sync as success even if the engine's own
+              # post-run child cleanup trips over the container's dropped
+              # capabilities (harmless "kill EACCES").
+              echo "$out" | grep -q "in sync with" && exit 0
+              exit "$rc"
+          envFrom:
+            - configMapRef:
+                name: {{ include "tech-club.fullname" . }}-config
+            - secretRef:
+                name: {{ include "tech-club.secretName" . }}
+                optional: true
+          {{- if .Values.postgresql.enabled }}
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "tech-club.fullname" . }}-db-url
+                  key: DATABASE_URL
+          {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        {{- end }}
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}

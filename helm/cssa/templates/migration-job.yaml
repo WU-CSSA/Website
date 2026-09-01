@@ -1,4 +1,10 @@
-{{- if .Values.migrations.enabled }}
+{{- /*
+  Legacy Helm post-upgrade hook. Superseded by the db-migrate init container in
+  deployment.yaml, which also covers plain pod restarts. Opt in with
+  migrations.hookJob=true if you specifically want migrations gated on
+  `helm upgrade` instead.
+*/ -}}
+{{- if .Values.migrations.hookJob }}
 apiVersion: batch/v1
 kind: Job
 metadata:

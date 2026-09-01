@@ -133,7 +133,15 @@ postgresql:
 
 # Database migrations
 migrations:
-  enabled: true  # Run Prisma migrations on install/upgrade
+  # Run `prisma db push` in an init container on every pod start, so the DB
+  # schema always matches the deployed image. This makes
+  # "git push -> image builds -> kubectl rollout restart" apply schema changes
+  # with no extra step. A failed sync blocks the rollout (pod stays in Init).
+  enabled: true
+  # Also run migrations as a Helm post-install/post-upgrade hook Job. Only fires
+  # on `helm upgrade`, never on a plain pod restart, so it's off by default and
+  # redundant with the init container above.
+  hookJob: false
 
 # Health check configuration
 healthCheck:

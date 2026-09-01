@@ -56,7 +56,8 @@ kubectl apply -f helm/argocd-application.yaml -n argocd
 | `postgresql.enabled`          | Deploy PostgreSQL                | `true`                    |
 | `postgresql.auth.password`    | PostgreSQL password              | `changeme-tech-club-password`  |
 | `postgresql.primary.persistence.size` | Database storage size   | `10Gi`                    |
-| `migrations.enabled`          | Run DB migrations on deploy      | `true`                    |
+| `migrations.enabled`          | Sync DB schema in an init container on every pod start | `true`  |
+| `migrations.hookJob`          | Also run migrations as a Helm upgrade hook Job | `false`          |
 | `autoscaling.enabled`         | Enable HPA                       | `false`                   |
 | `externalSecrets.enabled`     | Use external-secrets operator    | `false`                   |
 
@@ -114,24 +115,43 @@ docker push ghcr.io/your-org/tech-club:v1.0.0
 
 ## Database Migrations
 
-Migrations run automatically on install/upgrade via a Helm hook job when `migrations.enabled: true` (default).
+With `migrations.enabled: true` (default), a `db-migrate` init container runs
+`prisma db push` before the app container on **every pod start**. So the normal
+flow is:
 
-To disable automatic migrations:
+```bash
+git push                                    # CI builds & pushes the image
+kubectl rollout restart deployment cssa -n cssa
+```
+
+The new pod's init container syncs the DB schema to whatever the image ships,
+then the app starts. A failed sync leaves the pod in `Init:Error` and the old
+pod keeps serving — it never rolls out a broken app.
+
+`prisma db push` runs with `--accept-data-loss`, so it will drop columns/tables
+your schema no longer declares. Keep schema changes additive, or run destructive
+changes by hand.
+
+To disable the init container (e.g. you run migrations out of band):
 
 ```yaml
 migrations:
   enabled: false
 ```
 
-To run migrations manually:
+To gate migrations on `helm upgrade` instead of pod start (does **not** cover
+plain restarts):
+
+```yaml
+migrations:
+  enabled: false
+  hookJob: true
+```
+
+To run a migration manually against the live DB:
 
 ```bash
-kubectl run tech-club-migrate \
-  --namespace tech-club \
-  --image=ghcr.io/your-org/tech-club:v1.0.0 \
-  --restart=Never \
-  --env="DATABASE_URL=postgresql://..." \
-  --command -- npx prisma migrate deploy
+kubectl exec -n cssa deploy/cssa -- sh -c 'cd /app && prisma db push --accept-data-loss --skip-generate'
 ```
 
 ## Monitoring

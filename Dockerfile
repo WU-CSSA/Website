@@ -52,6 +52,11 @@ COPY --from=prisma /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=prisma /app/node_modules/@prisma ./node_modules/@prisma
 COPY prisma ./prisma/
 
+# Prisma CLI, pinned to the client version, so the migration init container
+# (see helm deployment.yaml) can run `prisma db push` on pod start without
+# fetching it from the network every time.
+RUN npm i -g prisma@6.19.3 --no-fund --no-audit && npm cache clean --force
+
 USER nextjs
 
 EXPOSE 3000
