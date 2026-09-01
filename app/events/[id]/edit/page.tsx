@@ -25,7 +25,7 @@ export default async function EditEventPage({
     notFound()
   }
 
-  if (event.authorId !== session.user.id) {
+  if (event.authorId !== session.user.id && !session.user.isAdmin) {
     redirect("/events")
   }
 

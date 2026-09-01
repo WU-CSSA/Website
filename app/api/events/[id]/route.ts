@@ -31,7 +31,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Event not found" }, { status: 404 })
     }
 
-    if (existingEvent.authorId !== session.user.id) {
+    if (existingEvent.authorId !== session.user.id && !session.user.isAdmin) {
       return NextResponse.json(
         { error: "You can only edit your own events" },
         { status: 403 }
