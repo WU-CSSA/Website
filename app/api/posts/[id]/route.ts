@@ -25,7 +25,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Post not found" }, { status: 404 })
     }
 
-    if (existingPost.authorId !== session.user.id) {
+    if (existingPost.authorId !== session.user.id && !session.user.isAdmin) {
       return NextResponse.json(
         { error: "You can only edit your own posts" },
         { status: 403 }

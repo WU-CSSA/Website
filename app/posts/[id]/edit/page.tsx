@@ -25,7 +25,7 @@ export default async function EditPostPage({
     notFound()
   }
 
-  if (post.authorId !== session.user.id) {
+  if (post.authorId !== session.user.id && !session.user.isAdmin) {
     redirect("/posts")
   }
 

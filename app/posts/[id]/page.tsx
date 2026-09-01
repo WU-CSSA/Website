@@ -25,7 +25,7 @@ export default async function PostPage({
 
   const isAuthor = session?.user?.id === post.authorId
   const isAdmin = session?.user?.isAdmin ?? false
-  const canDelete = isAuthor || isAdmin
+  const canManage = isAuthor || isAdmin
 
   return (
     <div className="min-h-screen bg-theme-bg">
@@ -37,16 +37,14 @@ export default async function PostPage({
               <h1 className={`text-3xl md:text-4xl ${theme.text.heading} flex-1`}>
                 {post.title}
               </h1>
-              {canDelete && (
+              {canManage && (
                 <div className="flex gap-2 ml-4">
-                  {isAuthor && (
-                    <Link
-                      href={`/posts/${post.id}/edit`}
-                      className={theme.button.secondary}
-                    >
-                      Edit
-                    </Link>
-                  )}
+                  <Link
+                    href={`/posts/${post.id}/edit`}
+                    className={theme.button.secondary}
+                  >
+                    Edit
+                  </Link>
                   <DeleteButton id={post.id} type="post" redirectTo="/posts" />
                 </div>
               )}
