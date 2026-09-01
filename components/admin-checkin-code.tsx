@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { theme } from "@/lib/theme"
 
 interface AdminCheckinCodeProps {
@@ -8,9 +9,12 @@ interface AdminCheckinCodeProps {
 }
 
 export function AdminCheckinCode({ eventId }: AdminCheckinCodeProps) {
+  const router = useRouter()
   const [code, setCode] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isGenerating, setIsGenerating] = useState(false)
+  const [isRemoving, setIsRemoving] = useState(false)
+  const [confirmRemove, setConfirmRemove] = useState(false)
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
@@ -32,11 +36,29 @@ export function AdminCheckinCode({ eventId }: AdminCheckinCodeProps) {
       const data = await res.json()
       if (!data.error) {
         setCode(data.code)
+        router.refresh()
       }
     } catch (error) {
       console.error("Generate code error:", error)
     } finally {
       setIsGenerating(false)
+    }
+  }
+
+  const removeCode = async () => {
+    setIsRemoving(true)
+    try {
+      const res = await fetch(`/api/events/${eventId}/code`, { method: "DELETE" })
+      const data = await res.json()
+      if (!data.error) {
+        setCode(null)
+        setConfirmRemove(false)
+        router.refresh()
+      }
+    } catch (error) {
+      console.error("Remove code error:", error)
+    } finally {
+      setIsRemoving(false)
     }
   }
 
@@ -143,6 +165,35 @@ export function AdminCheckinCode({ eventId }: AdminCheckinCodeProps) {
               )}
             </button>
           </div>
+
+          {confirmRemove ? (
+            <div className="flex items-center gap-3 text-sm">
+              <span className="text-theme-muted">
+                Remove code and stop check-in?
+              </span>
+              <button
+                onClick={removeCode}
+                disabled={isRemoving}
+                className="font-medium text-red-600 hover:underline dark:text-red-400 disabled:opacity-50"
+              >
+                {isRemoving ? "Removing…" : "Remove"}
+              </button>
+              <button
+                onClick={() => setConfirmRemove(false)}
+                disabled={isRemoving}
+                className="text-theme-muted hover:underline"
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setConfirmRemove(true)}
+              className={theme.button.ghost}
+            >
+              Remove code
+            </button>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center gap-4">

@@ -98,3 +98,51 @@ export async function POST(
     )
   }
 }
+
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const session = await auth()
+    if (!session?.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    }
+
+    const { id } = await params
+
+    const event = await prisma.event.findUnique({
+      where: { id },
+      select: { id: true, authorId: true },
+    })
+
+    if (!event) {
+      return NextResponse.json({ error: "Event not found" }, { status: 404 })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { isAdmin: true },
+    })
+
+    if (event.authorId !== session.user.id && !user?.isAdmin) {
+      return NextResponse.json(
+        { error: "Only the event author or admin can remove the check-in code" },
+        { status: 403 }
+      )
+    }
+
+    await prisma.event.update({
+      where: { id },
+      data: { checkInCode: null },
+    })
+
+    return NextResponse.json({ code: null })
+  } catch (error) {
+    console.error("Remove code error:", error)
+    return NextResponse.json(
+      { error: "An error occurred while removing the code" },
+      { status: 500 }
+    )
+  }
+}
