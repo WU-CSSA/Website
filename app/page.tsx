@@ -4,6 +4,7 @@ import { theme } from "@/lib/theme"
 import { ContributionGraph } from "@/components/contribution-graph"
 import { FeaturedProjects } from "@/components/featured-projects"
 import { AttendanceLeaderboard } from "@/components/attendance-leaderboard"
+import { getAttendanceLeaderboard } from "@/lib/leaderboard"
 
 export default async function Home() {
   const recentPosts = await prisma.post.findMany({
@@ -28,44 +29,7 @@ export default async function Home() {
     take: 5,
   })
 
-  const topAttendees = await prisma.user.findMany({
-    where: {
-      eventRegistrations: {
-        some: {
-          checkedInAt: { not: null },
-        },
-      },
-    },
-    select: {
-      id: true,
-      displayName: true,
-      name: true,
-      image: true,
-      _count: {
-        select: {
-          eventRegistrations: {
-            where: { checkedInAt: { not: null } },
-          },
-        },
-      },
-    },
-    orderBy: {
-      eventRegistrations: {
-        _count: "desc",
-      },
-    },
-    take: 10,
-  })
-
-  const leaderboardUsers = topAttendees
-    .filter((user) => user._count.eventRegistrations > 0)
-    .map((user, index) => ({
-      rank: index + 1,
-      id: user.id,
-      displayName: user.displayName || user.name,
-      image: user.image,
-      checkInCount: user._count.eventRegistrations,
-    }))
+  const leaderboardUsers = await getAttendanceLeaderboard(10)
 
   return (
     <div className="min-h-screen bg-theme-bg">

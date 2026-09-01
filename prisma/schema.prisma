@@ -60,6 +60,8 @@ model User {
   events             Event[]
   projects           Project[]
   eventRegistrations EventRegistration[]
+  forms              Form[]
+  formResponses      FormResponse[]
 }
 
 model VerificationToken {
@@ -107,8 +109,13 @@ model Event {
   updatedAt   DateTime  @updatedAt
   authorId    String
 
+  checkInFormId       String?
+  checkInFormRequired Boolean @default(true)
+
   author        User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
   registrations EventRegistration[]
+  checkInForm   Form?               @relation(fields: [checkInFormId], references: [id], onDelete: SetNull)
+  formResponses FormResponse[]
 }
 
 model Project {
@@ -128,6 +135,80 @@ model Project {
   authorId     String
 
   author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+enum FormQuestionType {
+  SHORT_TEXT
+  LONG_TEXT
+  SINGLE_CHOICE
+  MULTI_CHOICE
+  RATING
+  BOOLEAN
+}
+
+model Form {
+  id          String   @id @default(cuid())
+  title       String
+  description String?  @db.Text
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  authorId    String
+
+  author    User           @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  questions FormQuestion[]
+  responses FormResponse[]
+  events    Event[]
+}
+
+model FormQuestion {
+  id          String           @id @default(cuid())
+  formId      String
+  order       Int
+  type        FormQuestionType
+  label       String           @db.Text
+  description String?          @db.Text
+  required    Boolean          @default(true)
+  options     String[]         @default([])
+  allowOther  Boolean          @default(false)
+  minRating   Int?
+  maxRating   Int?
+
+  form    Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  answers FormAnswer[]
+
+  @@index([formId])
+}
+
+model FormResponse {
+  id        String   @id @default(cuid())
+  formId    String
+  eventId   String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  form    Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  event   Event?       @relation(fields: [eventId], references: [id], onDelete: SetNull)
+  user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers FormAnswer[]
+
+  @@unique([formId, eventId, userId])
+  @@index([formId])
+  @@index([eventId])
+}
+
+model FormAnswer {
+  id         String @id @default(cuid())
+  responseId String
+  questionId String
+  value      Json
+
+  response FormResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question FormQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([responseId, questionId])
+  @@index([questionId])
 }
 
 model EventRegistration {

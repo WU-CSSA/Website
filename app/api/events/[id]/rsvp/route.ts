@@ -110,6 +110,13 @@ export async function DELETE(
       where: { eventId_userId: { eventId: id, userId: session.user.id } },
     })
 
+    if (registration?.checkedInAt) {
+      return NextResponse.json(
+        { error: "You can't cancel your RSVP after checking in" },
+        { status: 400 }
+      )
+    }
+
     if (registration) {
       await prisma.eventRegistration.update({
         where: { eventId_userId: { eventId: id, userId: session.user.id } },

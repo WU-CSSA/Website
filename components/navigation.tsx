@@ -57,12 +57,20 @@ export async function Navigation() {
             {session?.user ? (
               <>
                 {session.user.isAdmin && (
-                  <Link
-                    href="/admin/users"
-                    className="hidden sm:block px-3 py-2 text-sm font-medium text-accent hover:text-accent-hover hover:bg-theme-hover rounded-lg transition-colors"
-                  >
-                    Admin
-                  </Link>
+                  <>
+                    <Link
+                      href="/admin/users"
+                      className="hidden sm:block px-3 py-2 text-sm font-medium text-accent hover:text-accent-hover hover:bg-theme-hover rounded-lg transition-colors"
+                    >
+                      Admin
+                    </Link>
+                    <Link
+                      href="/admin/forms"
+                      className="hidden sm:block px-3 py-2 text-sm font-medium text-accent hover:text-accent-hover hover:bg-theme-hover rounded-lg transition-colors"
+                    >
+                      Forms
+                    </Link>
+                  </>
                 )}
                 <div className="h-6 w-px bg-theme-border mx-2 hidden sm:block" />
                 <div className="flex items-center gap-3">

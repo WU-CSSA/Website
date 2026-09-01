@@ -1,21 +1,46 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
+import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
 import { theme } from "@/lib/theme"
+import type { FormQuestionDef } from "@/lib/forms"
+import { FormRenderer, type RendererChange } from "./form-renderer"
 import { SignInLink } from "./sign-in-link"
 
 interface CheckinFormProps {
   eventId: string
   hasCheckedIn?: boolean
+  checkInForm?: {
+    id: string
+    title: string
+    description: string | null
+    questions: FormQuestionDef[]
+  } | null
+  formRequired?: boolean
 }
 
-export function CheckinForm({ eventId, hasCheckedIn = false }: CheckinFormProps) {
-  const { data: session, status } = useSession()
+export function CheckinForm({
+  eventId,
+  hasCheckedIn = false,
+  checkInForm = null,
+  formRequired = true,
+}: CheckinFormProps) {
+  const { status } = useSession()
+  const router = useRouter()
   const [code, setCode] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   const [success, setSuccess] = useState(hasCheckedIn)
+  const [poll, setPoll] = useState<RendererChange>({
+    answers: [],
+    isValid: !checkInForm,
+  })
+
+  const handlePollChange = useCallback((change: RendererChange) => {
+    setPoll(change)
+  }, [])
 
   if (status === "loading") {
     return null
@@ -45,31 +70,41 @@ export function CheckinForm({ eventId, hasCheckedIn = false }: CheckinFormProps)
               clipRule="evenodd"
             />
           </svg>
-          <span className="font-medium">You're checked in!</span>
+          <span className="font-medium">You&apos;re checked in!</span>
         </div>
       </div>
     )
   }
 
+  const pollSatisfied = !checkInForm || !formRequired || poll.isValid
+  const canSubmit = code.length === 6 && pollSatisfied && !isLoading
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
+    setFieldErrors({})
     setIsLoading(true)
 
     try {
       const res = await fetch(`/api/events/${eventId}/checkin`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: code.trim() }),
+        body: JSON.stringify({
+          code: code.trim(),
+          answers: checkInForm ? poll.answers : undefined,
+        }),
       })
       const data = await res.json()
 
       if (data.error) {
         setError(data.error)
+        if (data.fieldErrors) setFieldErrors(data.fieldErrors)
       } else {
         setSuccess(true)
+        // Refresh server components so RSVP/attendance state reflects check-in.
+        router.refresh()
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again.")
     } finally {
       setIsLoading(false)
@@ -81,47 +116,75 @@ export function CheckinForm({ eventId, hasCheckedIn = false }: CheckinFormProps)
       <h3 className={`text-sm font-medium ${theme.text.heading} mb-3`}>
         Event Check-in
       </h3>
-      <form onSubmit={handleSubmit} className="flex gap-2">
-        <input
-          type="text"
-          value={code}
-          onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
-          placeholder="Enter 6-digit code"
-          maxLength={6}
-          pattern="\d{6}"
-          className={`${theme.input.className} flex-1 text-center tracking-widest font-mono`}
-          disabled={isLoading}
-        />
-        <button
-          type="submit"
-          disabled={isLoading || code.length !== 6}
-          className={theme.button.primary}
-        >
-          {isLoading ? (
-            <svg
-              className="animate-spin h-4 w-4"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              />
-            </svg>
-          ) : (
-            "Check In"
-          )}
-        </button>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {checkInForm && (
+          <div className="space-y-3">
+            {checkInForm.description && (
+              <p className="text-sm text-theme-muted">
+                {checkInForm.description}
+              </p>
+            )}
+            <FormRenderer
+              questions={checkInForm.questions}
+              disabled={isLoading}
+              fieldErrors={fieldErrors}
+              onChange={handlePollChange}
+            />
+            {!formRequired && (
+              <p className="text-xs text-theme-muted">
+                This poll is optional.
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-2">
+          <input
+            type="text"
+            inputMode="numeric"
+            value={code}
+            onChange={(e) =>
+              setCode(e.target.value.replace(/\D/g, "").slice(0, 6))
+            }
+            placeholder="Enter 6-digit code"
+            maxLength={6}
+            pattern="\d{6}"
+            className={`${theme.input.className} flex-1 text-center tracking-widest font-mono`}
+            disabled={isLoading}
+          />
+          <button
+            type="submit"
+            disabled={!canSubmit}
+            className={theme.button.primary}
+          >
+            {isLoading ? (
+              <svg
+                className="animate-spin h-4 w-4"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                />
+              </svg>
+            ) : (
+              "Check In"
+            )}
+          </button>
+        </div>
       </form>
+
       {error && (
         <p className="mt-2 text-sm text-red-600 dark:text-red-400">{error}</p>
       )}

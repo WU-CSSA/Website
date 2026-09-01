@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma"
 import { theme } from "@/lib/theme"
+import { getAttendanceLeaderboard } from "@/lib/leaderboard"
 import { AttendanceLeaderboard } from "@/components/attendance-leaderboard"
 
 export const metadata = {
@@ -8,44 +8,7 @@ export const metadata = {
 }
 
 export default async function LeaderboardPage() {
-  const leaderboard = await prisma.user.findMany({
-    where: {
-      eventRegistrations: {
-        some: {
-          checkedInAt: { not: null },
-        },
-      },
-    },
-    select: {
-      id: true,
-      displayName: true,
-      name: true,
-      image: true,
-      _count: {
-        select: {
-          eventRegistrations: {
-            where: { checkedInAt: { not: null } },
-          },
-        },
-      },
-    },
-    orderBy: {
-      eventRegistrations: {
-        _count: "desc",
-      },
-    },
-    take: 100,
-  })
-
-  const rankedUsers = leaderboard
-    .filter((user) => user._count.eventRegistrations > 0)
-    .map((user, index) => ({
-      rank: index + 1,
-      id: user.id,
-      displayName: user.displayName || user.name,
-      image: user.image,
-      checkInCount: user._count.eventRegistrations,
-    }))
+  const rankedUsers = await getAttendanceLeaderboard(100)
 
   return (
     <div className="min-h-screen bg-theme-bg">

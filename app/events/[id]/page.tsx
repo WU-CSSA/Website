@@ -7,6 +7,8 @@ import { MarkdownContent } from "@/components/markdown-content"
 import { RsvpButton } from "@/components/rsvp-button"
 import { CheckinForm } from "@/components/checkin-form"
 import { AdminCheckinCode } from "@/components/admin-checkin-code"
+import { EventFormManager } from "@/components/event-form-manager"
+import { EventPollResults } from "@/components/event-poll-results"
 import { AttendeesList } from "@/components/attendees-list"
 import { theme } from "@/lib/theme"
 
@@ -22,6 +24,9 @@ export default async function EventPage({
     where: { id },
     include: {
       author: true,
+      checkInForm: {
+        include: { questions: { orderBy: { order: "asc" } } },
+      },
       registrations: {
         where: { checkedInAt: { not: null } },
         include: {
@@ -149,6 +154,7 @@ export default async function EventPage({
                   eventId={event.id}
                   initialRsvpCount={rsvpCount}
                   initialHasRsvped={!!userRegistration?.rsvpedAt}
+                  initialHasCheckedIn={!!userRegistration?.checkedInAt}
                 />
 
                 {/* Check-in Form (only if code exists) */}
@@ -156,6 +162,8 @@ export default async function EventPage({
                   <CheckinForm
                     eventId={event.id}
                     hasCheckedIn={!!userRegistration?.checkedInAt}
+                    checkInForm={event.checkInForm}
+                    formRequired={event.checkInFormRequired}
                   />
                 )}
               </>
@@ -166,13 +174,24 @@ export default async function EventPage({
               <AttendeesList attendees={attendees} />
             )}
 
+            {/* Past Event - Exit poll results for managers */}
+            {isPastEvent && canManageEvent && event.checkInFormId && (
+              <div className="pt-4 border-t border-theme-border">
+                <EventPollResults
+                  eventId={event.id}
+                  formId={event.checkInFormId}
+                />
+              </div>
+            )}
+
             {/* Admin/Author Panel */}
             {canManageEvent && !isPastEvent && (
-              <div className="pt-4 border-t border-theme-border">
-                <h3 className={`text-sm font-medium ${theme.text.muted} mb-4`}>
+              <div className="pt-4 border-t border-theme-border space-y-4">
+                <h3 className={`text-sm font-medium ${theme.text.muted}`}>
                   Event Management
                 </h3>
                 <AdminCheckinCode eventId={event.id} />
+                <EventFormManager eventId={event.id} />
               </div>
             )}
           </div>

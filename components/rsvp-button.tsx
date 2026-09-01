@@ -9,15 +9,18 @@ interface RsvpButtonProps {
   eventId: string
   initialRsvpCount?: number
   initialHasRsvped?: boolean
+  initialHasCheckedIn?: boolean
 }
 
 export function RsvpButton({
   eventId,
   initialRsvpCount = 0,
   initialHasRsvped = false,
+  initialHasCheckedIn = false,
 }: RsvpButtonProps) {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const [hasRsvped, setHasRsvped] = useState(initialHasRsvped)
+  const [hasCheckedIn, setHasCheckedIn] = useState(initialHasCheckedIn)
   const [rsvpCount, setRsvpCount] = useState(initialRsvpCount)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -28,6 +31,7 @@ export function RsvpButton({
         .then((data) => {
           if (!data.error) {
             setHasRsvped(data.hasRsvped)
+            setHasCheckedIn(data.hasCheckedIn)
             setRsvpCount(data.rsvpCount)
           }
         })
@@ -40,6 +44,9 @@ export function RsvpButton({
       window.location.href = loginHref(window.location.pathname)
       return
     }
+
+    // Checking in locks attendance — no un-RSVP after that.
+    if (hasCheckedIn) return
 
     setIsLoading(true)
     try {
@@ -62,8 +69,15 @@ export function RsvpButton({
     <div className="flex items-center gap-3">
       <button
         onClick={handleRsvp}
-        disabled={isLoading}
-        className={hasRsvped ? theme.button.secondary : theme.button.primary}
+        disabled={isLoading || hasCheckedIn}
+        title={
+          hasCheckedIn ? "You can't cancel your RSVP after checking in" : undefined
+        }
+        className={
+          hasRsvped || hasCheckedIn
+            ? theme.button.secondary
+            : theme.button.primary
+        }
       >
         {isLoading ? (
           <svg
@@ -85,7 +99,7 @@ export function RsvpButton({
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-        ) : hasRsvped ? (
+        ) : hasRsvped || hasCheckedIn ? (
           <svg
             className="w-4 h-4 mr-2"
             fill="currentColor"
@@ -98,7 +112,7 @@ export function RsvpButton({
             />
           </svg>
         ) : null}
-        {hasRsvped ? "RSVPed" : "RSVP"}
+        {hasCheckedIn ? "Checked in" : hasRsvped ? "RSVPed" : "RSVP"}
       </button>
       <span className="text-sm text-theme-muted">
         {rsvpCount} {rsvpCount === 1 ? "person" : "people"} attending
