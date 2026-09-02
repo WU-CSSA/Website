@@ -1,6 +1,6 @@
-# Tech Club - Student Technology Association Website
+# Willamette Technology Club Website
 
-A modern web application built with Next.js for the Student Technology Association. Features include event management, blog posts, user authentication, and markdown rendering.
+A modern web application built with Next.js for the Willamette Technology Club. Features include event management, blog posts, user authentication, and markdown rendering.
 
 ## Features
 
@@ -95,7 +95,7 @@ Authentication uses GitHub OAuth. You need to create a GitHub OAuth App for loca
 1. Go to [GitHub Developer Settings](https://github.com/settings/developers)
 2. Click **"New OAuth App"**
 3. Fill in the details:
-   - **Application name**: `Tech Club Dev` (or any name)
+   - **Application name**: `Willamette Technology Club Dev` (or any name)
    - **Homepage URL**: `http://localhost:3000`
    - **Authorization callback URL**: `http://localhost:3000/api/auth/callback/github`
 4. Click **"Register application"**

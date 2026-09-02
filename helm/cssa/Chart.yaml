@@ -1,6 +1,6 @@
 apiVersion: v2
 name: tech-club
-description: Student Technology Association web application
+description: Willamette Technology Club web application
 type: application
 version: 0.1.0
 appVersion: "1.0.0"
@@ -9,7 +9,7 @@ keywords:
   - tech-club
   - student-association
 maintainers:
-  - name: Tech Club Team
+  - name: Willamette Technology Club Team
 
 dependencies:
   - name: postgresql

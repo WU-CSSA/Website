@@ -3,8 +3,8 @@ import { getAttendanceLeaderboard } from "@/lib/leaderboard"
 import { AttendanceLeaderboard } from "@/components/attendance-leaderboard"
 
 export const metadata = {
-  title: "Attendance Leaderboard | Tech Club",
-  description: "See who attends the most Tech Club events",
+  title: "Attendance Leaderboard | Willamette Technology Club",
+  description: "See who attends the most Willamette Technology Club events",
 }
 
 export default async function LeaderboardPage() {

@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Tech Club | Student Technology Association",
-  description: "Student Technology Association - Connect, Learn, and Build",
+  title: "Willamette Technology Club",
+  description: "Willamette Technology Club - Connect, Learn, and Build",
 };
 
 export default function RootLayout({

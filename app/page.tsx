@@ -46,8 +46,8 @@ export default async function Home() {
               Welcome to Tech Club
             </div>
             <h1 className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl ${theme.text.heading} leading-tight`}>
-              Student Technology
-              <span className="block text-accent">Association</span>
+              Willamette Technology
+              <span className="block text-accent">Club</span>
             </h1>
             <p className="mt-6 text-lg md:text-xl text-theme-secondary max-w-2xl mx-auto leading-relaxed">
               Join us in exploring the exciting world of technology. Connect with fellow students,

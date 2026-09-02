@@ -18,7 +18,7 @@ export async function Navigation() {
             >
               <img
                 src="/logo.svg"
-                alt="Tech Club"
+                alt="Willamette Technology Club"
                 className="h-8 w-8"
               />
               <span className="hidden sm:inline">Tech Club</span>

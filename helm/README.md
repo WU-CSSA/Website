@@ -1,6 +1,6 @@
-# Tech Club Helm Chart
+# Willamette Technology Club Helm Chart
 
-Helm chart for deploying the Student Technology Association (Tech Club) web application to Kubernetes.
+Helm chart for deploying the Willamette Technology Club web application to Kubernetes.
 
 ## Prerequisites
 
